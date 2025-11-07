@@ -4,12 +4,12 @@ channels:
   - defaults
 dependencies:
   - python=3.10
+  - pip
   - pandas
   - numpy
   - scikit-learn
   - mlflow
   - matplotlib
   - seaborn
-  - pip
   - pip:
       - boto3
