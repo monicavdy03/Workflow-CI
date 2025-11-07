@@ -2,7 +2,7 @@ name: CI - Retrain Model with MLflow Project
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ main, master ]
   pull_request:
 
 jobs:
@@ -18,10 +18,12 @@ jobs:
         with:
           activate-environment: prediksi_suhu_env
           environment-file: MLProject/conda.yaml
-          python-version: 3.10
+          auto-activate-base: false
 
-      - name: Install MLflow
-        run: pip install mlflow
+      - name: Verify conda environment
+        run: |
+          conda info
+          conda list
 
       - name: Run MLflow Project
         run: mlflow run MLProject --env-manager=local
