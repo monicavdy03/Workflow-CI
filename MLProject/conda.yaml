@@ -1,0 +1,14 @@
+name: prediksi_suhu_env
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pandas
+  - numpy
+  - scikit-learn
+  - mlflow
+  - matplotlib
+  - seaborn
+  - pip
+  - pip:
+      - boto3
