@@ -8,7 +8,7 @@ import mlflow.sklearn
 
 # Argument parser untuk file dataset
 parser = argparse.ArgumentParser()
-parser.add_argument("--data_path", type=str, default="dataset_preprocessing.csv")
+parser.add_argument("--data_path", type=str, default="weather_preprocessed.csv")
 args = parser.parse_args()
 
 # Muat dataset
