@@ -1,34 +1,29 @@
-name: CI - Retrain Model with MLflow Project
+name: MLflow Model Retraining CI
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   retrain:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Set up Conda Environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: prediksi_suhu_env
+          activate-environment: mlflow-env
           environment-file: MLProject/conda.yaml
-          python-version: 3.9
-          auto-activate-base: false
+          python-version: 3.10
 
-      - name: Install MLflow (inside conda env)
-        shell: bash -l {0}
+      - name: Install MLflow
         run: |
-          conda activate prediksi_suhu_env
           pip install mlflow
 
       - name: Run MLflow Project
-        shell: bash -l {0}
         run: |
-          conda activate prediksi_suhu_env
-          mlflow run MLProject --env-manager=local
+          mlflow run MLProject
