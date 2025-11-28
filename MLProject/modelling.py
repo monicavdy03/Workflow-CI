@@ -32,13 +32,33 @@ for col in drop_cols:
     if col in df.columns:
         df = df.drop(col, axis=1)
 
-# --- Convert datetime ---
+# --- Convert datetime safely ---
 if "time" in df.columns:
-    df["time"] = pd.to_datetime(df["time"], errors='coerce')
+    print("Converting 'time' column to datetime...")
+
+    # Coba parse datetime secara lebih agresif
+    df["time"] = pd.to_datetime(
+        df["time"],
+        errors="coerce",
+        infer_datetime_format=True,
+        utc=False
+    )
+
+    # Cek apakah ada nilai NaT
+    if df["time"].isna().any():
+        print("⚠ Warning: Beberapa nilai 'time' gagal di-parse dan akan di-drop")
+        df = df.dropna(subset=["time"])
+
+    # Pastikan tipe sudah datetime
+    if not pd.api.types.is_datetime64_any_dtype(df["time"]):
+        raise TypeError("❌ Kolom 'time' tetap bukan datetime setelah parsing!")
+
+    # Extract tanggal
     df["year"] = df["time"].dt.year
     df["month"] = df["time"].dt.month
     df["day"] = df["time"].dt.day
     df["hour"] = df["time"].dt.hour
+
     df = df.drop("time", axis=1)
 
 # --- Encode kategori ---
