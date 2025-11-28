@@ -31,17 +31,30 @@ for col in drop_cols:
     if col in df.columns:
         df = df.drop(col, axis=1)
 
-# --- Convert datetime ---
+# --- Convert datetime robust / aman ---
 if "time" in df.columns:
-    df["time"] = pd.to_datetime(df["time"], errors="coerce", infer_datetime_format=True)
-    df = df.dropna(subset=["time"])
+    print("Trying to convert 'time' into datetime...")
 
-    df["year"] = df["time"].dt.year
-    df["month"] = df["time"].dt.month
-    df["day"] = df["time"].dt.day
-    df["hour"] = df["time"].dt.hour
+    # 1️⃣ Coba parse langsung
+    df["time"] = pd.to_datetime(df["time"], errors="coerce", utc=True)
 
-    df = df.drop("time", axis=1)
+    # 2️⃣ Jika masih banyak NaT, coba parse manual
+    if df["time"].isna().sum() > (0.3 * len(df)):  
+        print("⚠ Format datetime tidak terdeteksi. Mencoba parse manual...")
+        df["time"] = df["time"].astype(str).str.replace("/", "-", regex=False)
+        df["time"] = pd.to_datetime(df["time"], errors="coerce", utc=True)
+
+    # 3️⃣ Jika tetap gagal → drop kolom time supaya training lanjut
+    if df["time"].isna().all():
+        print("❌ Kolom 'time' gagal diparse, akan dihapus.")
+        df = df.drop("time", axis=1)
+    else:
+        print("✅ Parsing datetime berhasil, mengekstrak fitur waktu...")
+        df["year"] = df["time"].dt.year
+        df["month"] = df["time"].dt.month
+        df["day"] = df["time"].dt.day
+        df["hour"] = df["time"].dt.hour
+        df = df.drop("time", axis=1)
 
 # --- Encode kategorikal ---
 cat_cols = df.select_dtypes(include=["object"]).columns
