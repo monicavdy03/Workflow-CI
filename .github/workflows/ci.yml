@@ -1,8 +1,8 @@
-name: MLflow Model Retraining CI
+name: Retrain ML Model
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,20 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          activate-environment: mlflow-env
-          environment-file: MLProject/conda.yaml
           python-version: "3.10"
 
-      - name: Install MLflow
+      - name: Install dependencies
         run: |
-          pip install mlflow
+          python -m pip install --upgrade pip
+          pip install mlflow pandas numpy scikit-learn matplotlib seaborn
 
       - name: Run MLflow Project
         run: |
-          mlflow run MLProject
+          cd MLProject
+          echo "🚀 Running MLflow project retraining..."
+          mlflow run . --env-manager=local -P data_path=weather_preprocessed.csv

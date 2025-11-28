@@ -1,41 +1,45 @@
-import argparse
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-import mlflow
-import mlflow.sklearn
+import argparse
+import os
 
-def load_data(path):
-    return pd.read_csv(path)
+# Argument dari MLflow
+parser = argparse.ArgumentParser()
+parser.add_argument("--data_path", type=str, default="weather_preprocessed.csv")
+args = parser.parse_args()
 
-def train_model(data):
-    X = data.iloc[:, :-1]
-    y = data.iloc[:, -1]
+print(f"📂 Loading dataset from: {args.data_path}")
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Path absolut ke file dataset
+data_path = os.path.join(os.path.dirname(__file__), args.data_path)
 
-    model = RandomForestClassifier()
-    model.fit(X_train, y_train)
+df = pd.read_csv(data_path)
+print("✔ Dataset loaded successfully!")
+print(df.head())
 
-    preds = model.predict(X_test)
-    acc = accuracy_score(y_test, preds)
+# Pemisahan fitur dan target
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
 
-    return model, acc
+# Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", type=str)
-    args = parser.parse_args()
+# Train model
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
 
-    mlflow.start_run()
+score = model.score(X_test, y_test)
+print(f"🔎 Model accuracy: {score}")
 
-    data = load_data(args.data_path)
-    model, acc = train_model(data)
-
-    mlflow.log_metric("accuracy", acc)
+# Log ke MLflow
+with mlflow.start_run():
+    mlflow.log_param("data_path", args.data_path)
+    mlflow.log_metric("accuracy", score)
     mlflow.sklearn.log_model(model, "model")
 
-    mlflow.end_run()
-
-    print(f"Training completed! Accuracy: {acc}")
+print("🎉 Training complete and model logged to MLflow!")

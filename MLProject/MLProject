@@ -1,10 +1,7 @@
-name: retraining-project
-
-conda_env: conda.yaml
+name: weather_retrain
 
 entry_points:
   main:
     parameters:
-      data_path: {type: str, default: "MLProject/weather_preprocessed.csv"}
-    command: |
-      python modelling.py --data_path {data_path}
+      data_path: {type: str, default: "weather_preprocessed.csv"}
+    command: "python modelling.py --data_path {data_path}"
