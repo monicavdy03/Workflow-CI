@@ -23,13 +23,14 @@ print("Dataset columns:", df.columns.tolist())
 # --- Target variable ---
 target_col = "temperature"
 
-# pastikan target ada
 if target_col not in df.columns:
     raise ValueError(f"ERROR: target '{target_col}' tidak ditemukan dalam dataset!")
 
-# --- Drop kolom yang tidak berguna ---
-if "Daily Summary" in df.columns:
-    df = df.drop("Daily Summary", axis=1)
+# --- Drop kolom yang tidak dipakai ---
+drop_cols = ["Daily Summary"]
+for col in drop_cols:
+    if col in df.columns:
+        df = df.drop(col, axis=1)
 
 # --- Convert datetime ---
 if "time" in df.columns:
@@ -40,16 +41,16 @@ if "time" in df.columns:
     df["hour"] = df["time"].dt.hour
     df = df.drop("time", axis=1)
 
-# --- Encode kategorikal (Summary, Precip Type) ---
-for col in df.select_dtypes(include=["object"]).columns:
+# --- Encode kategori ---
+cat_cols = df.select_dtypes(include=["object"]).columns
+for col in cat_cols:
     df[col] = df[col].fillna("Unknown")
     df[col] = LabelEncoder().fit_transform(df[col])
 
-# --- Siapkan X dan y ---
+# --- Split X dan y ---
 X = df.drop(target_col, axis=1)
 y = df[target_col]
 
-# --- Split ---
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
