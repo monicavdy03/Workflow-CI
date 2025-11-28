@@ -3,7 +3,8 @@ name: Retrain ML Model
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
 
 jobs:
   retrain:
@@ -26,5 +27,5 @@ jobs:
       - name: Run MLflow Project
         run: |
           cd MLProject
-          echo "🚀 Running MLflow project retraining..."
+          echo "Running MLflow project retraining..."
           mlflow run . --env-manager=local -P data_path=weather_preprocessed.csv
