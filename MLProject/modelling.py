@@ -36,24 +36,25 @@ for col in drop_cols:
 if "time" in df.columns:
     print("Converting 'time' column to datetime...")
 
-    # Coba parse datetime secara lebih agresif
     df["time"] = pd.to_datetime(
         df["time"],
         errors="coerce",
-        infer_datetime_format=True,
-        utc=False
+        infer_datetime_format=True
     )
 
-    # Cek apakah ada nilai NaT
-    if df["time"].isna().any():
-        print("⚠ Warning: Beberapa nilai 'time' gagal di-parse dan akan di-drop")
-        df = df.dropna(subset=["time"])
+    # Drop rows yang gagal parse time
+    before = len(df)
+    df = df.dropna(subset=["time"])
+    after = len(df)
 
-    # Pastikan tipe sudah datetime
-    if not pd.api.types.is_datetime64_any_dtype(df["time"]):
-        raise TypeError("❌ Kolom 'time' tetap bukan datetime setelah parsing!")
+    if after < before:
+        print(f"⚠ {before-after} baris dibuang karena format 'time' tidak valid")
 
-    # Extract tanggal
+    # Pastikan dataset tidak kosong
+    if len(df) == 0:
+        raise ValueError("❌ Semua nilai 'time' gagal di-parse. Dataset kosong!")
+
+    # Extract date/time features
     df["year"] = df["time"].dt.year
     df["month"] = df["time"].dt.month
     df["day"] = df["time"].dt.day
